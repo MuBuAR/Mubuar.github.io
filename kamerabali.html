@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+  <title>Kamera AR</title>
+
+  <!-- A-Frame & AR.js -->
+  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/aframe-gesture-detector@4.0.5/dist/gesture-detector.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/aframe-super-hands-component@4.0.5/dist/aframe-super-hands.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/chenzlabs/aframe-ar-touch-controls/dist/aframe-ar-touch-controls.min.js"></script>
+  <script src="https://github.com/lucide-icons/lucide/tree/main/packages/lucide"></script>
+  <!-- Font & CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: 'Poppins', sans-serif;
+      background-color: #000;
+    }
+    a-scene {
+      position: absolute;
+      top: 0; left: 0;
+      z-index: 0;
+    }
+    .instruction-note, .exit-home-button, .manipulation-buttons, .model-description-box {
+      animation: fadeIn 0.8s ease-out forwards;
+      opacity: 0;
+    }
+ .instruction-note {
+  position: absolute; top: 20px; right: 20px;
+  background: rgba(0,0,0,0.6); color: white;
+  padding: 6px 10px; border-radius: 8px;
+  font-size: 0.8em; font-weight: 600;
+  z-index: 1001;
+  max-width: 180px;  /* ✅ agar wrap */
+  text-align: left;  /* ✅ agar lebih rapi */
+  word-wrap: break-word;
+  line-height: 1.2;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  transform: translateX(0);
+}
+
+    .exit-home-button {
+      position: absolute; top: 20px; left: 20px;
+      background: #393939; color: white;
+      padding: 6px 12px; /* sebelumnya 12px 20px */
+      font-size: 0.8em;   /* sebelumnya 1em */
+      cursor: pointer; z-index: 1001;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      transform: translateX(-20px); border: none;
+      border-radius: 20cap;
+    }
+    .exit-home-button:hover {
+      background: #217DBB; transform: scale(1.03);
+    }
+    .manipulation-buttons {
+      position: absolute; bottom: 20px; left: 20px;
+      display: none; flex-direction: column; gap: 10px;
+      z-index: 1001; transform: translateY(20px);
+    }
+    .manipulation-buttons button {
+      background: rgba(46,204,113,0.8); color: white;
+      padding: 12px 18px; border-radius: 8px;
+      font-size: 0.95em; font-weight: 600;
+      cursor: pointer; border: none;
+      display: flex; align-items: center; gap: 8px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    }
+    .manipulation-buttons button:hover {
+      background: #2ECC71; transform: translateY(-3px);
+    }
+    .audio-box {
+      position: absolute; bottom: 20px; right: 20px;
+      width: 90%; max-width: 340px; z-index: 1000;
+      display: none; border-radius: 12px; overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+      animation: fadeIn 0.8s ease-out forwards;
+      opacity: 0; background: rgba(0,0,0,0.6); padding: 10px;
+    }
+    .audio-box audio {
+      width: 100%; margin-bottom: 8px;
+      border-radius: 6px; background: white;
+    }
+/*     .model-description-box {
+      position: absolute; top: 80px; left: 50%;
+      transform: translateX(-50%);
+      background: rgba(44,62,80,0.85); color: white;
+      padding: 15px 25px; border-radius: 12px;
+      font-size: 1em; text-align: center;
+      max-width: 90%; z-index: 1002; display: none;
+    }
+    .model-description-box h3 {
+      margin: 0 0 10px 0; font-size: 1.3em;
+      font-weight: 700; color: #2ECC71;
+    } */
+.minimal-controls {
+  position: absolute;
+  top: 50%;
+  right: 20px;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1001;
+}
+
+
+.minimal-controls button {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  font-size: 1em;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  cursor: pointer;
+}
+
+.minimal-controls button:hover {
+  background: rgba(255,255,255,0.3);
+}
+
+
+.description-mini {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.5);
+  color: white;
+  padding: 6px 12px;
+  font-size: 0.75em;
+  border-radius: 10px;
+  cursor: pointer;
+  z-index: 1001;
+  text-align: center;
+}
+
+
+.description-full {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 90%;
+  background: rgba(0,0,0,0.8);
+  color: white;
+  padding: 20px;
+  font-size: 0.9em;
+  border-radius: 10px;
+  z-index: 2000;
+}
+
+    @keyframes fadeIn {
+      to { opacity: 1; transform: translate(0,0); }
+    }
+    @media (max-width: 600px) {
+  .instruction-note {
+    font-size: 0.7em;
+    max-width: 140px;
+  }
+}
+
+  </style>
+</head>
+<body>
+
+  <div class="instruction-note" id="instructionNote">Arahkan kamera HP pada marker AR</div>
+  <button class="exit-home-button" onclick="exitToHome()"><i class="fas fa-home"></i> </button>
+
+ <div class="manipulation-buttons" id="manipulationButtons">
+    
+  </div>
+  <div class="model-description-box" id="modelDescriptionBox">
+    <h3 id="modelDescriptionTitle"></h3>
+    <p id="modelDescriptionContent"></p>
+  </div>
+
+  <a-scene embedded arjs vr-mode-ui="enabled: false" gesture-detector>
+    <a-entity camera></a-entity>
+  </a-scene>
+
+  <script>
+   const markers = [
+{
+    id: "marker1",
+    audioBox: "audio-benda1",
+    audioId: "aud-benda1-bali",
+    modelId: "model-benda1",
+    modelSrc: "aset/benda1.glb",
+    markerUrl: "marker/marker1.patt",
+    audioSrc: "audiobali/benda1_bali.m4a",
+    initialScale: "2 2 2",
+    descriptionTitle: "Kapak Penetak",
+    descriptionContent: "Alat puniki kasurat saking batu basal olih teknik pemangkasan nganggon tujuan ngidangang sisi selem. Fungsi alat puniki wantah dados alat neketang utawi mecacah. Wenten ring jaman berburu prasida kaklasifikasikang. Lokasi: Desa Sembiran, Kecamatan Tejakula, Kabupaten Buleleng."
+  },
+  {
+    id: "marker2",
+    audioBox: "audio-benda2",
+    audioId: "aud-benda2-bali",
+    modelId: "model-benda2",
+    modelSrc: "aset/benda2.glb",
+    markerUrl: "marker/marker2.patt",
+    audioSrc: "audiobali/benda2_bali.m4a",
+    initialScale: "2 2 2",
+    descriptionTitle: "Serpih / Serut",
+    descriptionContent: "Serpih puniki kasurat saking batu basal nganggon teknik ngerempek saking inti batu sane nyidayang ngidang sisi selem. Dadosang alat puniki dados alat mecacah lan nyerut. Mawit ring jaman berburu tingkat alit. Lokasi: Desa Sembiran, Kecamatan Tejakula, Kabupaten Buleleng."
+  },
+  {
+    id: "marker3",
+    audioBox: "audio-benda3",
+    audioId: "aud-benda3-bali",
+    modelId: "model-benda3",
+    modelSrc: "aset/benda3.glb",
+    markerUrl: "marker/marker3.patt",
+    audioSrc: "audiobali/benda3_bali.m4a",
+    initialScale: "2 2 2",
+    descriptionTitle: "Kapak Penimbas",
+    descriptionContent: "Kapak puniki kasurat saking batu basal olih teknik pemangkasan nyanggra bidang pukul. Fungsi punika nyidaang ngiket utawi mecacah. Kaanggen ring jaman berburu tingkat sederhana. Lokasi: Desa Sembiran, Kecamatan Tejakula, Kabupaten Buleleng."
+  },
+  {
+    id: "marker4",
+    audioBox: "audio-benda4",
+    audioId: "aud-benda4-bali",
+    modelId: "model-benda4",
+    modelSrc: "aset/benda4.glb",
+    markerUrl: "marker/marker4.patt",
+    audioSrc: "audiobali/benda4_bali.m4a",
+    initialScale: "2 2 2",
+    descriptionTitle: "Periuk",
+    descriptionContent: "Periuk puniki kaolah saking tanah liat nganggon teknik roda muter lan teknik tetep. Fungsi punika dados perabot rumah tangga. Asal puniki saking jaman ngelampahin subak. Lokasi: Kalang Anyar, Desa Banjar Asem, Kecamatan Seririt, Kabupaten Buleleng."
+  },
+  {
+    id: "marker5",
+    audioBox: "audio-benda5",
+    audioId: "aud-benda5-bali",
+    modelId: "model-benda5",
+    modelSrc: "aset/benda5.glb",
+    markerUrl: "marker/marker5.patt",
+    audioSrc: "audiobali/benda5_bali.m4a",
+    initialScale: "2 2 2",
+    descriptionTitle: "Proto Kapak Genggam",
+    descriptionContent: "Kapak puniki kasurat saking batu basal olih teknik pemangkasan sane nyidayang ngidang bidang pukul. Fungsi dados alat mecacah. Puniki mawit saking jaman berburu tingkat sederhana. Lokasi: Desa Sembiran, Kecamatan Tejakula, Kabupaten Buleleng."
+  },
+  {
+    id: "marker6",
+    audioBox: "audio-benda6",
+    audioId: "aud-benda6-bali",
+    modelId: "model-benda6",
+    modelSrc: "aset/benda6.glb",
+    markerUrl: "marker/marker6.patt",
+    audioSrc: "audiobali/benda6_bali.m4a",
+    initialScale: "2 2 2",
+    descriptionTitle: "Patung Sederhana",
+    descriptionContent: "Patung puniki kasurat saking batu padas nganggon teknik pahat. Dadosang fungsi upacara. Puniki kawentenang ring jaman Perundagian. Lokasi: Situs Tigawasa, Kecamatan Banjar, Kabupaten Buleleng."
+  },
+  {
+    id: "marker7",
+    audioBox: "audio-benda7",
+    audioId: "aud-benda7-bali",
+    modelId: "model-benda7",
+    modelSrc: "aset/benda7.glb",
+    markerUrl: "marker/marker7.patt",
+    audioSrc: "audiobali/benda7_bali.mp3",
+    initialScale: "2 2 2",
+    descriptionTitle: "Sarcophagus",
+    descriptionContent: "Peti Pati adalah sebuah wadah yang terbuat dari batu dan digunakan untuk menyimpan jenazah, terutama pada masa purwa kala. Di beberapa tempat, terdapat pula yang membentuknya menyerupai peti atau wadah lainnya. Benda ini diperkirakan berasal dari sekitar tahun 1000 Masehi dan ditemukan pada tahun 2004 di Desa Gobleg, Kecamatan Banjar, Kabupaten Buleleng."
+  },
+  {
+    id: "marker8",
+    audioBox: "audio-benda8",
+    audioId: "aud-benda8-bali",
+    modelId: "model-benda8",
+    modelSrc: "aset/benda8.glb",
+    markerUrl: "marker/marker8.patt",
+    audioSrc: "audiobali/benda8_bali.m4a",
+    initialScale: "2 2 2",
+    descriptionTitle: "Batu Pipisan",
+    descriptionContent: "Saking Desa Umejero, Desa Munduk, Kecamatan Seririt, Kabupaten Buleleng.Peripis emas tipis puniki kaanggen hiasan, limbakang kembang padma. Peripis punika padetayang ring wancikan utawi angga-angga pinaka bagian suci ring wangunan, dados ring sumuran, sudut, utawi puncak. Ring konteks puniki, peripis punika nglaksanayang padedagingan pinaka jiwa utawi inner spirit saking bangunan suci."
+  },
+  {
+    id: "marker9",
+    audioBox: "audio-benda9",
+    audioId: "aud-benda9-bali",
+    modelId: "model-benda9",
+    modelSrc: "aset/benda9.glb",
+    markerUrl: "marker/marker9.patt",
+    audioSrc: "audiobali/benda9_bali.m4a",
+    initialScale: "2 2 2",
+    descriptionTitle: "Neraka",
+    descriptionContent: "Saking Situs Ularan, Kecamatan Seririt, Kabupaten Buleleng.Benda puniki kadadosang saking logam perunggu, sane kapigunaang antuk teknik acire perdu (cor) miwah tempa.Fungsinipun dados piranti upacara, sane makta ring jaman perundagian"
+  },
+  {
+    id: "marker10",
+    audioBox: "audio-benda10",
+    audioId: "aud-benda10-bali",
+    modelId: "model-benda10",
+    modelSrc: "aset/benda10.glb",
+    markerUrl: "marker/marker10.patt",
+    audioSrc: "audiobali/benda10_bali.m4a",
+    initialScale: "2 2 2",
+    descriptionTitle: "Stupika",
+    descriptionContent: "Saking tanah liat punika upami stupa alit. Ring jeroning punika, kadadosang aksara utawi ulam mantra sane dados simbol pujawali ring ajaran Buddha. Ring agama Buddha, stupika puniki dados pratiti minangka sarana pangastawan, ring Situs Kalibukbuk, Kecamatan Buleleng, Kabupaten Buleleng."
+  },
+  {
+    id: "marker11",
+    audioBox: "audio-benda11",
+    audioId: "aud-benda11-bali",
+    modelId: "model-benda11",
+    modelSrc: "aset/benda11.glb",
+    markerUrl: "marker/marker11.patt",
+    audioSrc: "audiobali/benda11_bali.mp3",
+    initialScale: "2 2 2",
+    descriptionTitle: "Sarcophagus",
+    descriptionContent: "Peti Pati merupakan wadah yang terbuat dari batu dan digunakan untuk menyimpan jenazah, terutama pada masa purwa kala. Beberapa di antaranya berbentuk seperti peti atau wadah yang tertutup rapat. Benda ini diperkirakan berasal dari sekitar tahun 1000 Masehi atau abad ke-10 dan ditemukan pada tahun 2009 di Desa Alas Angker, Kecamatan Buleleng, Kabupaten Buleleng."
+  },
+  {
+    id: "marker12",
+    audioBox: "audio-benda12",
+    audioId: "aud-benda12-bali",
+    modelId: "model-benda12",
+    modelSrc: "aset/benda12.glb",
+    markerUrl: "marker/marker12.patt",
+    audioSrc: "audiobali/benda12_bali.m4a",
+    initialScale: "2 2 2",
+    descriptionTitle: "Mata Uang",
+    descriptionContent: "Saking Desa Umejero, Desa Munduk, Kecamatan Seririt, Kabupaten Buleleng.Mata uang puniki kadadosang saking emas, ring indik nominan ipun kapastikayang olih bobot, wangun, lan hiasan ipun. Mata uang emas punika dados piranti tukar resmi sane kadadosang ring masa kuna."
+  },
+  {
+    id: "marker13",
+    audioBox: "audio-benda13",
+    audioId: "aud-benda13-bali",
+    modelId: "model-benda13",
+    modelSrc: "aset/benda13.glb",
+    markerUrl: "marker/marker13.patt",
+    audioSrc: "audiobali/benda13_bali.m4a",
+    initialScale: "2 2 2",
+    descriptionTitle: "Wadah Kapur Sirih",
+    descriptionContent: "Wadah puniki kaanggen ngelaksanayang tradisi ngemamah sirih. Sekatup sane kaolah saking logam puniki dados tempat kapur sirih. Lokasi: Situs Tejakula, Kecamatan Tejakula, Kabupaten Buleleng."
+  },
+  {
+    id: "marker14",
+    audioBox: "audio-benda14",
+    audioId: "aud-benda14-bali",
+    modelId: "model-benda14",
+    modelSrc: "aset/benda14.glb",
+    markerUrl: "marker/marker14.patt",
+    audioSrc: "audiobali/benda14_bali.m4a",
+    initialScale: "2 2 2",
+    descriptionTitle: "Tojok Perunggu",
+    descriptionContent: "Benda puniki kasurat saking logam perunggu olih teknik acire perdu lan tempa. Fungsi dados alat upacara. Mawit saking jaman Perundagian. Lokasi: Ularan, Kecamatan Seririt, Kabupaten Buleleng."
+  },
+  {
+    id: "marker15",
+    audioBox: "audio-benda15",
+    audioId: "aud-benda15-bali",
+    modelId: "model-benda15",
+    modelSrc: "aset/benda15.glb",
+    markerUrl: "marker/marker15.patt",
+    audioSrc: "audiobali/benda15_bali.m4a",
+    initialScale: "2 2 2",
+    descriptionTitle: "beliung persegi",
+    descriptionContent: "Asalipun saking desa Sukasada. Kaolah ring batu andesit, ngagem teknik panghalusan. Fungsi beliung punika wantah alat utama ring makarya becik ring jaman tetanem."
+  }
+];
+
+
+
+    const scene = document.querySelector('a-scene');
+    const manipulationButtons = document.getElementById('manipulationButtons');
+    const instructionNote = document.getElementById('instructionNote');
+    const modelDescriptionBox = document.getElementById('modelDescriptionBox');
+    const modelDescriptionTitle = document.getElementById('modelDescriptionTitle');
+    const modelDescriptionContent = document.getElementById('modelDescriptionContent');
+    let activeModel = null;
+
+    function hideAllAudio() {
+      markers.forEach(({ audioBox, audioId }) => {
+        const box = document.getElementById(audioBox);
+        const audio = document.getElementById(audioId);
+        if (box) box.style.display = 'none';
+        if (audio) { audio.pause(); audio.currentTime = 0; }
+      });
+    }
+
+    function showManipulationButtons() {
+      manipulationButtons.style.display = 'flex';
+      manipulationButtons.style.animation = 'fadeIn 0.8s ease-out forwards';
+    }
+
+    function hideManipulationButtons() {
+      manipulationButtons.style.display = 'none';
+      manipulationButtons.style.opacity = 0;
+    }
+
+    function showModelDescription(title, content) {
+      modelDescriptionTitle.textContent = title;
+      modelDescriptionContent.textContent = content;
+      modelDescriptionBox.style.display = 'block';
+    }
+
+    function hideModelDescription() {
+      modelDescriptionBox.style.display = 'none';
+      modelDescriptionBox.style.opacity = 0;
+    }
+
+    function rotateModel(axis, angle) {
+      if (activeModel) {
+        let rot = activeModel.getAttribute('rotation') || { x: 0, y: 0, z: 0 };
+        if (axis === 'X') rot.x += angle;
+        if (axis === 'Y') rot.y += angle;
+        if (axis === 'Z') rot.z += angle;
+        activeModel.setAttribute('rotation', rot);
+      }
+    }
+
+    function scaleModel(factor) {
+      if (activeModel) {
+        let scale = activeModel.getAttribute('scale');
+        let parts = typeof scale === 'string' ? scale.split(' ').map(parseFloat) : [scale.x, scale.y, scale.z];
+        let newScale = parts.map(s => Math.min(5, Math.max(0.01, s * factor)));
+        activeModel.setAttribute('scale', newScale.join(' '));
+      }
+    }
+
+    function resetModel() {
+      if (activeModel) {
+        const data = markers.find(m => m.modelId === activeModel.id);
+        activeModel.setAttribute('position', '0 0 0');
+        activeModel.setAttribute('rotation', '0 0 0');
+        activeModel.setAttribute('scale', data.initialScale);
+      }
+    }
+
+    function exitToHome() {
+      window.location.href = 'index.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      instructionNote.style.animationDelay = '0.5s';
+      instructionNote.style.animation = 'fadeIn 0.8s ease-out forwards';
+      document.querySelector('.exit-home-button').style.animationDelay = '0.7s';
+      document.querySelector('.exit-home-button').style.animation = 'fadeIn 0.8s ease-out forwards';
+
+      // Generate dynamic elements
+      markers.forEach(data => {
+        // Marker and Model
+        const marker = document.createElement('a-marker');
+        marker.setAttribute('id', data.id);
+        marker.setAttribute('type', 'pattern');
+        marker.setAttribute('url', data.markerUrl);
+        
+        const model = document.createElement('a-entity');
+        model.setAttribute('id', data.modelId);
+        model.setAttribute('gltf-model', data.modelSrc);
+        model.setAttribute('scale', data.initialScale);
+        model.setAttribute('position', '0 0 0');
+        model.setAttribute('ar-touch-controls', 'rotation: true; scale: true');
+        marker.appendChild(model);
+        scene.appendChild(marker);
+
+        // Audio Box
+        const audioBox = document.createElement('div');
+        audioBox.setAttribute('id', data.audioBox);
+        audioBox.className = 'audio-box';
+
+        const audio = document.createElement('audio');
+        audio.setAttribute('id', data.audioId);
+        audio.setAttribute('src', data.audioSrc);
+        audio.setAttribute('controls', true);
+        audioBox.appendChild(audio);
+        document.body.appendChild(audioBox);
+
+        // Event
+        marker.addEventListener('markerFound', () => {
+          hideAllAudio();
+          audioBox.style.display = 'block';
+          if (audio) {
+            audio.currentTime = 0;
+            audio.play();
+          }
+          activeModel = model;
+          showManipulationButtons();
+          showModelDescription(data.descriptionTitle, data.descriptionContent);
+        });
+
+        marker.addEventListener('markerLost', () => {
+          if (audio) {
+            audio.pause();
+            audio.currentTime = 0;
+          }
+          audioBox.style.display = 'none';
+          activeModel = null;
+          hideManipulationButtons();
+          hideModelDescription();
+        });
+      });
+    });
+    function toggleDescription() {
+  const mini = document.getElementById('descMini');
+  const full = document.getElementById('descFull');
+  if (full.style.display === 'block') {
+    full.style.display = 'none';
+    mini.style.display = 'block';
+  } else {
+    full.style.display = 'block';
+    mini.style.display = 'none';
+  }
+}
+
+function showModelDescription(title, content) {
+  document.getElementById('descMini').style.display = 'block';
+  document.getElementById('descFull').style.display = 'none';
+  document.getElementById('descTitle').innerText = title;
+  document.getElementById('descText').innerText = content;
+}
+function rotateModel(axis, angle) {
+  if (!activeModel) {
+    console.warn("activeModel belum tersedia!");
+    return;
+  }
+  let rot = activeModel.getAttribute('rotation') || { x: 0, y: 0, z: 0 };
+  if (axis === 'X') rot.x += angle;
+  if (axis === 'Y') rot.y += angle;
+  if (axis === 'Z') rot.z += angle;
+  activeModel.setAttribute('rotation', rot);
+}
+
+  </script>
+  <!-- Minimal Control Buttons -->
+<!-- Tombol Kontrol Minimalis di Tengah Bawah -->
+<div class="minimal-controls">
+  <button onclick="rotateModel('X', -10)" class="btn-control" title="Rotate X -">
+    <i data-lucide="arrow-up"></i>
+  </button>
+  <button onclick="rotateModel('Y', -10)" class="btn-control" title="Rotate Y -">
+    <i data-lucide="rotate-ccw"></i>
+  </button>
+  <button onclick="rotateModel('Z', -10)" class="btn-control" title="Rotate Z -">
+    <i data-lucide="undo-2"></i>
+  </button>
+  <button onclick="rotateModel('X', 10)" class="btn-control" title="Rotate X +">
+    <i data-lucide="arrow-down"></i>
+  </button>
+  <button onclick="rotateModel('Y', 10)" class="btn-control" title="Rotate Y +">
+    <i data-lucide="rotate-cw"></i>
+  </button>
+  <button onclick="rotateModel('Z', 10)" class="btn-control" title="Rotate Z +">
+    <i data-lucide="redo-2"></i>
+  </button>
+  <button onclick="scaleModel(1.1)" class="btn-control" title="Zoom In">
+    <i data-lucide="zoom-in"></i>
+  </button>
+  <button onclick="resetModel()" class="btn-control" title="Reset">
+    <i data-lucide="refresh-ccw"></i>
+  </button>
+  <button onclick="scaleModel(0.9)" class="btn-control" title="Zoom Out">
+    <i data-lucide="zoom-out"></i>
+  </button>
+</div>
+
+
+
+<!-- Mini Description -->
+<div class="description-mini" id="descMini" onclick="toggleDescription()">
+  Klik untuk info benda
+</div>
+
+<!-- Full Description -->
+<div class="description-full" id="descFull" onclick="toggleDescription()">
+  <h3 id="descTitle"></h3>
+  <p id="descText"></p>
+</div>
+
+</body>
+
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+  lucide.createIcons();
+</script>
+
+</html>

@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panduan Penggunaan AR Interaktif - Museum Buleleng</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <style>
+
+        @import url('https://fonts.googleapis.com/css2?family=Lobster&family=Poppins:wght@400;600;700&display=swap');
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-image: url('latar1.png'); 
+            background-size: contain;
+            background-position: top center;
+            background-repeat: no-repeat;
+            background-color: #f0f4f8;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.1));
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        h1 {
+            margin-bottom: 30px;
+            font-size: 2.8em;
+            text-align: center;
+            color: #ffffff;
+            font-weight: 700;
+            font-family: 'Lobster', cursive;
+            text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.6);
+            z-index: 1;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .menu {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            width: 100%;
+            max-width: 300px;
+            z-index: 1;
+            padding: 0 15px;
+        }
+
+        .menu a {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            background-color: #3b749d;
+            color: white;
+            padding: 16px 25px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1em;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .menu a i {
+            position: absolute;
+            left: 20px;
+            font-size: 1.4em;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .menu a span {
+            width: 100%;
+            text-align: center;
+        }
+
+        .menu a:hover {
+            background-color: #5a94c1;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+        }
+
+        .exit-button {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 14px 22px;
+            border-radius: 10px;
+            font-size: 1.05em;
+            cursor: pointer;
+            z-index: 10;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            font-weight: 600;
+        }
+
+        .exit-button:hover {
+            background-color: #c82333;
+            transform: translateX(-50%) translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.35);
+        }
+
+
+        body.guide-page-new {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f8f8;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+
+            background-image: url('https://placehold.co/1920x1080/D6EAF8/000000?text=Museum+AR+Guide'); 
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            display: block; 
+            min-height: auto;
+            justify-content: unset;
+            align-items: unset;
+            padding-top: 40px; 
+            padding-bottom: 40px;
+        }
+
+        body.guide-page-new::before {
+            content: none; 
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 30px; 
+            background-color: rgba(255, 255, 255, 0.98); 
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); 
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .container h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 3em; 
+            margin-bottom: 35px;
+            font-weight: bold;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+            animation: none; 
+            font-family: 'Inter', sans-serif; /* Pastikan font Inter */
+        }
+
+        .intro-paragraph {
+            text-align: center;
+            font-size: 1.15em;
+            margin-bottom: 40px;
+            color: #555;
+        }
+
+        .section-title {
+            color: #34495e;
+            font-size: 2.2em; /* Ukuran h2 lebih besar */
+            margin-top: 40px;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #aed6f1; /* Border lebih tebal */
+            padding-bottom: 10px;
+            text-align: left; /* Pastikan judul section rata kiri */
+        }
+
+        .container p {
+            margin-bottom: 18px;
+            font-size: 1.05em;
+        }
+
+        .interactive-list {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 30px;
+        }
+
+        .interactive-list li {
+            background-color: #eaf2f8;
+            padding: 15px 20px; /* Padding lebih besar */
+            margin-bottom: 12px; /* Jarak antar list item */
+            border-left: 6px solid #5dade2; /* Border lebih tebal */
+            border-radius: 10px; /* Sudut lebih membulat */
+            font-size: 1.05em;
+            transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease; /* Transisi lebih halus */
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer; /* Menunjukkan interaktivitas */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* Bayangan lembut */
+        }
+
+        .interactive-list li:hover {
+            transform: translateX(8px); /* Geser lebih jauh */
+            background-color: #d6eaf8;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); /* Bayangan lebih kuat saat hover */
+        }
+
+        .icon {
+            font-size: 1.5em; /* Ukuran ikon lebih besar */
+            color: #5dade2;
+            flex-shrink: 0; /* Pastikan ikon tidak menyusut */
+        }
+
+        .step-image {
+            width: 100%;
+            max-width: 500px; /* Lebar maksimum gambar langkah */
+            height: auto;
+            border-radius: 15px; /* Sudut lebih membulat */
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15); /* Bayangan lebih jelas */
+            margin: 30px auto; /* Jarak lebih besar */
+            display: block;
+        }
+
+        /* Animasi untuk langkah-langkah yang muncul saat scroll */
+        .step-item {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+            background-color: #ffffff; /* Latar belakang untuk setiap langkah */
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px; /* Jarak antar langkah */
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .step-item h3 {
+            font-size: 1.8em;
+            color: #3b749d;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .step-item p {
+            font-size: 1em;
+            color: #666;
+            text-align: left;
+        }
+
+        .step-item.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Tombol 'Mulai Pengalaman AR Sekarang!' */
+        .start-ar-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%); /* Gradien hijau */
+            color: white;
+            border: none;
+            padding: 18px 30px; /* Padding lebih besar */
+            border-radius: 12px;
+            font-size: 1.3em; /* Ukuran font lebih besar */
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.4); /* Bayangan hijau */
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+            text-decoration: none;
+            width: fit-content; /* Sesuaikan lebar dengan konten */
+            margin: 0 auto; /* Pusatkan tombol */
+        }
+
+        .start-ar-button i {
+            margin-right: 12px;
+            font-size: 1.5em;
+        }
+
+        .start-ar-button:hover {
+            background: linear-gradient(135deg, #66BB6A 0%, #4CAF50 100%);
+            transform: translateY(-5px) scale(1.02); /* Sedikit naik dan membesar */
+            box-shadow: 0 12px 25px rgba(76, 175, 80, 0.6);
+        }
+
+        /* Tombol "Kembali ke Beranda Utama" */
+        .back-to-home-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #6c757d; /* Warna abu-abu */
+            color: white;
+            border: none;
+            padding: 14px 25px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            font-weight: 600;
+            text-decoration: none;
+            width: fit-content; /* Sesuaikan lebar dengan konten */
+            margin: 20px auto 0; /* Pusatkan tombol dengan jarak dari atas */
+        }
+
+        .back-to-home-button i {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .back-to-home-button:hover {
+            background-color: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+
+        /* --- Media Queries untuk Responsivitas --- */
+        @media (max-width: 768px) {
+            /* Halaman Utama */
+            h1 { font-size: 2.2em; margin-bottom: 25px; }
+            .menu { max-width: 280px; }
+            .menu a { font-size: 1em; padding: 14px 20px; }
+            .exit-button { bottom: 25px; padding: 12px 20px; font-size: 1em; }
+
+            /* Halaman Panduan Baru */
+            .container { margin: 20px; padding: 25px; }
+            .container h1 { font-size: 2.4em; margin-bottom: 25px; }
+            .intro-paragraph { font-size: 1em; margin-bottom: 30px; }
+            .section-title { font-size: 1.8em; margin-top: 30px; margin-bottom: 15px; padding-bottom: 8px; }
+            .interactive-list li { padding: 12px 15px; font-size: 0.95em; }
+            .icon { font-size: 1.3em; }
+            .step-image { max-width: 90%; margin: 25px auto; }
+            .step-item { padding: 20px; margin-bottom: 25px; }
+            .step-item h3 { font-size: 1.5em; margin-bottom: 12px; }
+            .step-item p { font-size: 0.9em; }
+            .start-ar-button { padding: 15px 25px; font-size: 1.1em; }
+            .start-ar-button i { font-size: 1.3em; margin-right: 10px; }
+            .back-to-home-button { padding: 12px 20px; font-size: 1em; }
+        }
+
+        @media (max-width: 480px) {
+            /* Halaman Utama */
+            h1 { font-size: 1.8em; margin-bottom: 20px; }
+            .menu { gap: 15px; max-width: 260px; }
+            .menu a { font-size: 0.95em; padding: 12px 18px; }
+            .exit-button { bottom: 20px; padding: 10px 16px; font-size: 0.95em; }
+
+            /* Halaman Panduan Baru */
+            body.guide-page-new { padding-top: 20px; padding-bottom: 20px; }
+            .container { margin: 15px; padding: 20px; }
+            .container h1 { font-size: 2em; margin-bottom: 20px; }
+            .intro-paragraph { font-size: 0.95em; margin-bottom: 25px; }
+            .section-title { font-size: 1.5em; margin-top: 25px; margin-bottom: 10px; padding-bottom: 6px; }
+            .interactive-list li { padding: 10px 12px; font-size: 0.9em; }
+            .icon { font-size: 1.2em; }
+            .step-image { margin: 20px auto; }
+            .step-item { padding: 15px; margin-bottom: 20px; }
+            .step-item h3 { font-size: 1.3em; margin-bottom: 10px; }
+            .step-item p { font-size: 0.85em; }
+            .start-ar-button { padding: 12px 20px; font-size: 1em; }
+            .start-ar-button i { font-size: 1.2em; margin-right: 8px; }
+            .back-to-home-button { padding: 10px 16px; font-size: 0.95em; margin-top: 15px; }
+        }
+    </style>
+</head>
+<body class="guide-page-new">
+    <div class="container">
+        <h1>Panduan Penggunaan Augmented Reality (AR)</h1>
+        <p class="intro-paragraph">Selamat datang di panduan penggunaan teknologi Augmented Reality kami! Ikuti langkah-langkah mudah ini untuk pengalaman belajar dan eksplorasi yang imersif di Museum Buleleng.</p>
+
+        <h2 class="section-title">Persyaratan Dasar</h2>
+        <p>Untuk memastikan pengalaman AR yang lancar, pastikan Anda memiliki hal-hal berikut:</p>
+        <ul class="interactive-list">
+            <li><span class="icon"><i class="fas fa-mobile-alt"></i></span> <strong>Perangkat Kompatibel:</strong> Smartphone atau tablet dengan dukungan AR (misalnya, Android dengan ARCore atau iOS dengan ARKit).</li>
+            <li><span class="icon"><i class="fas fa-wifi"></i></span> <strong>Koneksi Internet Stabil:</strong> Diperlukan untuk mengunduh konten AR awal.</li>
+            <li><span class="icon"><i class="fas fa-battery-full"></i></span> <strong>Baterai Cukup:</strong> Penggunaan AR dapat menguras daya baterai lebih cepat.</li>
+        </ul>
+
+        <h2 class="section-title">Langkah-langkah Penggunaan AR</h2>
+        <p>Ikuti urutan langkah ini untuk memulai pengalaman AR Anda:</p>
+        
+        <div class="step-animation-container">
+            <div class="step-item fade-in-section">
+                <h3>1. Buka Aplikasi AR</h3>
+                <p>Mulai dengan membuka aplikasi AR. Pastikan aplikasi memiliki izin untuk mengakses kamera perangkat Anda.</p>
+                <img src="https://placehold.co/400x250/C5E1A5/000000?text=Buka+Aplikasi" alt="[Image of Open AR App]" class="step-image" onerror="this.onerror=null; this.src='https://placehold.co/400x250/FFEBEE/000000?text=Error';" />
+            </div>
+
+            <div class="step-item fade-in-section">
+                <h3>2. Pindai Objek Museum dengan Marker AR</h3>
+                <p>Arahkan kamera perangkat Anda ke objek fisik di Museum Buleleng yang memiliki penanda AR (marker). Pastikan marker terlihat jelas di layar Anda.</p>
+                <img src="https://placehold.co/400x250/FFCC80/000000?text=Pindai+Marker" alt="[Image of Scan AR Marker]" class="step-image" onerror="this.onerror=null; this.src='https://placehold.co/400x250/FFEBEE/000000?text=Error';" />
+            </div>
+
+            <div class="step-item fade-in-section">
+                <h3>3. Jelajahi Konten AR</h3>
+                <p>Setelah marker terdeteksi, objek 3D atau informasi digital akan muncul di atas marker di layar Anda. Anda dapat berinteraksi dengan konten AR ini.</p>
+                <ul class="interactive-list">
+                    <li><span class="icon"><i class="fas fa-hand-point-up"></i></span> <strong>Sentuh dan Seret:</strong> Untuk memindahkan objek.</li>
+                    <li><span class="icon"><i class="fas fa-search-plus"></i></span> <strong>Cubit untuk Zoom:</strong> Untuk memperbesar atau memperkecil objek.</li>
+                    <li><span class="icon"><i class="fas fa-sync-alt"></i></span> <strong>Putar Perangkat:</strong> Untuk melihat objek dari berbagai sudut.</li>
+                </ul>
+                <img src="https://placehold.co/400x250/BBDEFB/000000?text=Interaksi+AR" alt="[Image of AR Interaction]" class="step-image" onerror="this.onerror=null; this.src='https://placehold.co/400x250/FFEBEE/000000?text=Error';" />
+            </div>
+        </div>
+
+        <h2 class="section-title">Tips untuk Pengalaman Terbaik</h2>
+        <ul class="interactive-list">
+            <li><span class="icon"><i class="fas fa-lightbulb"></i></span> <strong>Pencahayaan Cukup:</strong> Pastikan area sekitar marker memiliki pencahayaan yang baik.</li>
+            <li><span class="icon"><i class="fas fa-ruler-horizontal"></i></span> <strong>Jarak Ideal:</strong> Jaga jarak perangkat Anda agar marker dapat dideteksi dengan optimal.</li>
+            <li><span class="icon"><i class="fas fa-sun"></i></span> <strong>Hindari Pantulan:</strong> Jangan biarkan cahaya langsung atau pantulan mengganggu marker.</li>
+            <li><span class="icon"><i class="fas fa-grip-lines"></i></span> <strong>Permukaan Datar:</strong> Tempatkan marker pada permukaan yang datar dan stabil.</li>
+        </ul>
+
+        <h2 class="section-title">Penyelesaian Masalah Umum</h2>
+        <ul class="interactive-list">
+            <li><span class="icon"><i class="fas fa-exclamation-triangle"></i></span> <strong>AR tidak muncul?</strong> Pastikan marker terlihat jelas di kamera. Coba sesuaikan jarak atau pencahayaan.</li>
+            <li><span class="icon"><i class="fas fa-redo-alt"></i></span> <strong>Aplikasi macet?</strong> Coba mulai ulang aplikasi atau perangkat Anda.</li>
+            <li><span class="icon"><i class="fas fa-thermometer-half"></i></span> <strong>Perangkat panas?</strong> Istirahatkan perangkat Anda sejenak. Penggunaan AR intensif dapat meningkatkan suhu perangkat.</li>
+        </ul>
+
+
+    </div>
+
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // Animasi kemunculan untuk elemen daftar
+            const listItems = document.querySelectorAll('.interactive-list li');
+            listItems.forEach((item, index) => {
+                item.style.opacity = 0;
+                item.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    item.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+                    item.style.opacity = 1;
+                    item.style.transform = 'translateY(0)';
+                }, 80 * index); // Penundaan untuk efek staggered
+            });
+
+            // Animasi muncul saat scroll untuk setiap langkah
+            const fadeInSections = document.querySelectorAll('.fade-in-section');
+
+            const observerOptions = {
+                root: null, // Menggunakan viewport sebagai root
+                rootMargin: '0px',
+                threshold: 0.1 // Setengah dari elemen harus terlihat
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target); // Berhenti mengamati setelah terlihat
+                    }
+                });
+            }, observerOptions);
+
+            fadeInSections.forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+</body>
+</html>
